@@ -5,12 +5,12 @@ import JsonResponse from '../models/response';
 import User from '../models/user';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { loginBody } from '../types/auth';
+import { loginBody, signupBody } from '../types/auth';
 
 /**
- * POST - login route
+ * POST - login
  */
-export const login_get = asyncHandler(async (req: Request, res: Response) => {
+export const login_post = asyncHandler(async (req: Request, res: Response) => {
 	const { username, password }: loginBody = req.body;
 
 	// check for body values errors
@@ -64,6 +64,54 @@ export const login_get = asyncHandler(async (req: Request, res: Response) => {
 	res.json(new JsonResponse(true, null, 'Login successfull', ''));
 });
 
-export const signun_post = asyncHandler(
-	async (req: Request, res: Response) => {}
-);
+/**
+ * POST - Signup
+ */
+export const signun_post = asyncHandler(async (req: Request, res: Response) => {
+	const { firstname, lastname, username, password }: signupBody = req.body;
+	const defaultImgURL =
+		'https://res.cloudinary.com/dkidfx99m/image/upload/v1719707237/uiotniwyo7xalhdurrf9.webp';
+	const defaultImgID = 'zioyniwyo9xalhduarf1';
+
+	// check for body validation errors
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		res.json(
+			new JsonResponse(false, null, 'Validation error', errors.array()[0].msg)
+		);
+		return;
+	}
+
+	// check if a given username already exists
+	const existingUsername = await User.findOne({ username: username }).exec();
+	if (existingUsername !== null) {
+		res.json(new JsonResponse(false, null, 'Username already exists', ''));
+		return;
+	}
+
+	const salt = process.env.BCRYPT_SALT;
+	if (salt === undefined) throw new Error('Bcrypt salt Not Found');
+
+	// hash the password
+	const hashedPassword = await bcrypt.hash(password, parseInt(salt));
+
+	// create the user
+	const user = new User({
+		firstname,
+		lastname,
+		username,
+		password: hashedPassword,
+		profile: {
+			url: defaultImgURL,
+			publicID: defaultImgID,
+		},
+		cover: {
+			url: '',
+			publicID: '',
+		},
+	});
+
+	await user.save();
+
+	res.json(new JsonResponse(true, null, 'Signup successfull', ''));
+});
