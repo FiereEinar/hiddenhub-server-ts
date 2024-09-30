@@ -10,7 +10,7 @@ import { loginBody } from '../types/auth';
 /**
  * POST - login route
  */
-export const login_post = asyncHandler(async (req: Request, res: Response) => {
+export const login_get = asyncHandler(async (req: Request, res: Response) => {
 	const { username, password }: loginBody = req.body;
 
 	// check for body values errors
@@ -63,3 +63,7 @@ export const login_post = asyncHandler(async (req: Request, res: Response) => {
 
 	res.json(new JsonResponse(true, null, 'Login successfull', ''));
 });
+
+export const signun_post = asyncHandler(
+	async (req: Request, res: Response) => {}
+);
