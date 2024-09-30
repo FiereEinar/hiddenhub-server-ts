@@ -5,13 +5,12 @@ import JsonResponse from '../models/response';
 import User from '../models/user';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { loginBody } from '../types/auth';
 
-type loginBody = {
-	username: string;
-	password: string;
-};
-
-export const login_get = asyncHandler(async (req: Request, res: Response) => {
+/**
+ * POST - login route
+ */
+export const login_post = asyncHandler(async (req: Request, res: Response) => {
 	const { username, password }: loginBody = req.body;
 
 	// check for body values errors

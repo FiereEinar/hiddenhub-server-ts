@@ -2,7 +2,27 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const UserSchema = new Schema({
+export interface IUser {
+	firstname: string;
+	lastname: string;
+	username: string;
+	password: string;
+	isOnline: boolean;
+	bio?: string;
+	friends: [IUser];
+	dateJoined: Date;
+	profile: {
+		url: string;
+		publicID: string;
+	};
+	cover: {
+		url: string;
+		publicID: string;
+	};
+	refreshToken: string;
+}
+
+const UserSchema = new Schema<IUser>({
 	firstname: { type: String, minLength: 1, required: true },
 	lastname: { type: String, minLength: 1, required: true },
 	username: { type: String, minLength: 1, required: true, unique: true },
