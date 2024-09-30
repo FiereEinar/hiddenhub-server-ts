@@ -1,10 +1,15 @@
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import { notFoundHandler } from './src/middlewares/not-found';
 import { errorHandler } from './src/middlewares/error';
+dotenv.config();
 
 const app = express();
 app.use(cors());
+
+import connectToDB from './src/database/mongodb';
+connectToDB();
 
 // routers
 import authRouter from './src/routes/auth';
