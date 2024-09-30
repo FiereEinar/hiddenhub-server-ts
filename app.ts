@@ -24,4 +24,4 @@ app.use('/auth', authRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(3000, () => console.log("Server is running on PORT 3000"));
+app.listen(3000, () => console.log('Server is running on PORT 3000'));
