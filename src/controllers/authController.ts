@@ -6,6 +6,8 @@ import User from '../models/user';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { loginBody, signupBody } from '../types/auth';
+import { CustomRequest } from '../types/request';
+import { cookieTokenName } from '../constants';
 
 /**
  * POST - login
@@ -54,7 +56,7 @@ export const login_post = asyncHandler(async (req: Request, res: Response) => {
 	await user.save();
 
 	// send the token as cookie
-	res.cookie('jwt_token', token, {
+	res.cookie(cookieTokenName, token, {
 		secure: true,
 		httpOnly: true,
 		sameSite: 'none',
@@ -115,3 +117,22 @@ export const signun_post = asyncHandler(async (req: Request, res: Response) => {
 
 	res.json(new JsonResponse(true, null, 'Signup successfull', ''));
 });
+
+export const logout = asyncHandler(
+	async (req: CustomRequest, res: Response) => {
+		// check if the cookie exists
+		if (!req.cookies?.jwt_token) {
+			res.sendStatus(204);
+			return;
+		}
+
+		const token = req.cookies.jwt_token as string;
+
+		// check if a user exists with that token
+		const user = await User.findOne({ refreshToken: token });
+		if (user === null) {
+			res.sendStatus(204);
+			return;
+		}
+	}
+);
