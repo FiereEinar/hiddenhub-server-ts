@@ -120,19 +120,29 @@ export const signun_post = asyncHandler(async (req: Request, res: Response) => {
 
 export const logout = asyncHandler(
 	async (req: CustomRequest, res: Response) => {
+		const cookie = req.cookies;
+		const token = cookie[cookieTokenName] as string;
+
 		// check if the cookie exists
-		if (!req.cookies?.jwt_token) {
+		if (!token) {
 			res.sendStatus(204);
 			return;
 		}
-
-		const token = req.cookies.jwt_token as string;
 
 		// check if a user exists with that token
 		const user = await User.findOne({ refreshToken: token });
-		if (user === null) {
-			res.sendStatus(204);
-			return;
+		if (user !== null) {
+			user.refreshToken = '';
+			await user.save();
 		}
+
+		// clear the cookie
+		res.clearCookie(cookieTokenName, {
+			secure: true,
+			httpOnly: true,
+			sameSite: 'none',
+		});
+
+		res.sendStatus(200);
 	}
 );
