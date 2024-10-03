@@ -6,6 +6,8 @@ import User from '../models/user';
 import { forbiddenUserData } from '../constants';
 import { imageUploader } from '../utils/uploader';
 import cloudinary from '../utils/cloudinary';
+import { changePasswordBody } from '../types/user';
+import bcrypt from 'bcryptjs';
 
 /**
  * GET - fetch user data
@@ -70,5 +72,55 @@ export const user_cover_update = asyncHandler(
 		}).exec();
 
 		res.json(new JsonResponse(true, null, 'User cover photo updated', ''));
+	}
+);
+
+/**
+ * PUT - update user password
+ */
+export const user_password_update = asyncHandler(
+	async (req: CustomRequest, res) => {
+		const { userID } = req.params;
+		const { oldPassword, newPassword, confirmNewPassword }: changePasswordBody =
+			req.body;
+
+		if (newPassword !== confirmNewPassword) {
+			res.json(
+				new JsonResponse(
+					false,
+					null,
+					'Password and confirm password do not match',
+					''
+				)
+			);
+			return;
+		}
+
+		const user = await User.findById(userID);
+		if (user === null) {
+			res.json(new JsonResponse(false, null, 'User not found', ''));
+			return;
+		}
+
+		const match = await bcrypt.compare(oldPassword, user.password);
+		if (!match) {
+			res.json(new JsonResponse(false, null, 'Old password do not match', ''));
+			return;
+		}
+
+		const salt = process.env.BCRYPT_SALT;
+		if (salt === undefined) throw new Error('Bcrypt salt Not Found');
+
+		const hashedPassword = await bcrypt.hash(newPassword, parseInt(salt));
+
+		const update = {
+			password: hashedPassword,
+		};
+
+		const updatedUser = await User.findByIdAndUpdate(user._id, update, {
+			new: true,
+		}).exec();
+
+		res.json(new JsonResponse(true, null, 'Password updated successfully', ''));
 	}
 );
