@@ -1,6 +1,17 @@
 import mongoose from 'mongoose';
+import { ICover, IProfile, IUser } from './user';
 
 const Schema = mongoose.Schema;
+
+export interface IGroup {
+	_id: string;
+	name: string;
+	members: [IUser];
+	admins: [IUser];
+	createdAt: Date;
+	profile: IProfile;
+	cover: ICover;
+}
 
 const GroupSchema = new Schema({
 	name: { type: String, minLength: 3, required: true },

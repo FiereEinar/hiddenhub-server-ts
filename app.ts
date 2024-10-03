@@ -19,6 +19,7 @@ connectToDB();
 // routers
 import authRouter from './src/routes/auth';
 import userRouter from './src/routes/user';
+import messageRouter from './src/routes/message';
 
 // middlewares
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use(cookieParser());
 // routes
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
+app.use('/message', messageRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

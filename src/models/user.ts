@@ -2,6 +2,13 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
+export interface IProfile {
+	url: string;
+	publicID: string;
+}
+
+export interface ICover extends IProfile {}
+
 export interface IUser {
 	_id: string;
 	firstname: string;
@@ -12,14 +19,8 @@ export interface IUser {
 	bio?: string;
 	friends: [IUser];
 	dateJoined: Date;
-	profile: {
-		url: string;
-		publicID: string;
-	};
-	cover: {
-		url: string;
-		publicID: string;
-	};
+	profile: IProfile;
+	cover: ICover;
 	refreshToken: string;
 }
 
