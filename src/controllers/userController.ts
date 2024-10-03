@@ -2,12 +2,13 @@ import asyncHandler from 'express-async-handler';
 import { CustomRequest } from '../types/request';
 import { Response } from 'express';
 import JsonResponse from '../models/response';
-import User from '../models/user';
+import User, { IUser } from '../models/user';
 import { forbiddenUserData } from '../constants';
 import { imageUploader } from '../utils/uploader';
 import cloudinary from '../utils/cloudinary';
-import { changePasswordBody } from '../types/user';
+import { changePasswordBody, updateUserBody } from '../types/user';
 import bcrypt from 'bcryptjs';
+import { UpdateQuery } from 'mongoose';
 
 /**
  * GET - fetch user data
@@ -59,7 +60,7 @@ export const user_cover_update = asyncHandler(
 			}
 		}
 
-		const update = {
+		const update: UpdateQuery<IUser> = {
 			cover: {
 				url: coverURL,
 				publicID: coverPublicID,
@@ -113,7 +114,7 @@ export const user_password_update = asyncHandler(
 
 		const hashedPassword = await bcrypt.hash(newPassword, parseInt(salt));
 
-		const update = {
+		const update: UpdateQuery<IUser> = {
 			password: hashedPassword,
 		};
 
@@ -124,3 +125,66 @@ export const user_password_update = asyncHandler(
 		res.json(new JsonResponse(true, null, 'Password updated successfully', ''));
 	}
 );
+
+/**
+ * PUT - update user status online/offline
+ */
+export const user_status_put = asyncHandler(async (req: CustomRequest, res) => {
+	const { userID } = req.params;
+	const { status }: { status: boolean } = req.body;
+
+	const updatedUser = await User.findByIdAndUpdate(
+		userID,
+		{ isOnline: status },
+		{ new: true }
+	).exec();
+
+	res.json(new JsonResponse(true, null, 'User status updated', ''));
+});
+
+/**
+ * PUT - update user
+ */
+export const user_update = asyncHandler(async (req: CustomRequest, res) => {
+	const { userID } = req.params;
+	const { firstname, lastname, username, bio }: updateUserBody = req.body;
+
+	const user = await User.findById(userID);
+	if (user === null) {
+		res.json(new JsonResponse(false, null, 'User not found', ''));
+		return;
+	}
+
+	let profileURL = user.profile.url;
+	let profilePublicID = user.profile.publicID;
+
+	if (req.file) {
+		const result = await imageUploader(req.file);
+
+		if (result !== undefined) {
+			profileURL = result.secure_url;
+			profilePublicID = result.public_id;
+
+			if (user.profile.publicID.length > 0) {
+				await cloudinary.uploader.destroy(user.profile.publicID);
+			}
+		}
+	}
+
+	const update: UpdateQuery<IUser> = {
+		firstname: firstname,
+		lastname: lastname,
+		username: username,
+		bio: bio,
+		profile: {
+			url: profileURL,
+			publicID: profilePublicID,
+		},
+	};
+
+	const updateUser = await User.findByIdAndUpdate(user._id, update, {
+		new: true,
+	}).exec();
+
+	res.json(new JsonResponse(true, null, 'User updated', ''));
+});
