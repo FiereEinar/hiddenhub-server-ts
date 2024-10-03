@@ -1,19 +1,24 @@
 import express from 'express';
-import { user_info_get } from '../controllers/userController';
+import {
+	user_cover_update,
+	user_info_get,
+	users_get,
+} from '../controllers/userController';
 import auth from '../middlewares/auth';
+import upload from '../utils/multer';
 
 const router = express.Router();
 
-// router.get('/', users_get);
+router.get('/', users_get);
 
 router.get('/:userID', auth, user_info_get);
 
-// router.put(
-// 	'/:userID/cover',
-// 	auth,
-// 	upload.single('coverPhoto'),
-// 	user_cover_update
-// );
+router.put(
+	'/:userID/cover',
+	auth,
+	upload.single('coverPhoto'),
+	user_cover_update
+);
 
 // router.put(
 // 	'/:userID/password',

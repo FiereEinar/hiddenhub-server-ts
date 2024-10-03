@@ -1,12 +1,16 @@
+import { UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
 import cloudinary from './cloudinary';
 import streamifier from 'streamifier';
 
-export const imageUploader = (file: {
-	buffer: string | Buffer | Uint8Array;
-}) => {
+export const imageUploader = (
+	file: Express.Multer.File
+): Promise<UploadApiResponse | UploadApiErrorResponse | undefined> => {
 	return new Promise((resolve, reject) => {
-		const uploadStream = cloudinary.uploader.upload_stream((result, err) => {
-			if (err) return reject(err);
+		const uploadStream = cloudinary.uploader.upload_stream((err, result) => {
+			if (err) {
+				reject(err);
+				return;
+			}
 			resolve(result);
 		});
 

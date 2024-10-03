@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 export interface IUser {
+	_id: string;
 	firstname: string;
 	lastname: string;
 	username: string;
