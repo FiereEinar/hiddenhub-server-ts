@@ -118,6 +118,9 @@ export const signun_post = asyncHandler(async (req: Request, res: Response) => {
 	res.json(new JsonResponse(true, null, 'Signup successfull', ''));
 });
 
+/**
+ * GET - Logout
+ */
 export const logout = asyncHandler(
 	async (req: CustomRequest, res: Response) => {
 		const cookie = req.cookies;
@@ -146,3 +149,37 @@ export const logout = asyncHandler(
 		res.sendStatus(200);
 	}
 );
+
+/**
+ * GET - Check for token validity
+ */
+export const check_auth = asyncHandler(async (req: Request, res: Response) => {
+	const cookies = req.cookies;
+
+	const token = cookies[cookieTokenName] as string;
+
+	// check if the token exists
+	if (!token) {
+		res.sendStatus(401);
+		return;
+	}
+
+	// check if a user with that token exists
+	const user = await User.findOne({ refreshToken: token }).exec();
+	if (user == null) {
+		res.sendStatus(403);
+		return;
+	}
+
+	const secretKey = process.env.JWT_SECRET_KEY;
+	if (secretKey === undefined) throw new Error('JWT Secret Key Not Found');
+
+	// verify the token
+	jwt.verify(token, secretKey, (err, data) => {
+		if (err) {
+			res.sendStatus(403);
+			return;
+		}
+		res.sendStatus(200);
+	});
+});
