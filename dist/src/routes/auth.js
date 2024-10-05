@@ -10,5 +10,5 @@ const router = express_1.default.Router();
 router.post('/login', validations_1.login_validation, authController_1.login_post);
 router.post('/signup', validations_1.signup_validation, authController_1.signun_post);
 router.get('/logout', authController_1.logout);
-router.get('/check-auth', authController_1.check_auth);
+router.get('/check', authController_1.check_auth);
 exports.default = router;
