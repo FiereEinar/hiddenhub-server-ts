@@ -24,14 +24,20 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
  * GET - fetch user data
  */
 exports.user_info_get = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield user_1.default.findById(req.params.userID, constants_1.forbiddenUserData);
+    const user = yield user_1.default.findById(req.params.userID, constants_1.forbiddenUserData)
+        .populate({
+        path: 'friends',
+        select: constants_1.forbiddenUserData,
+    })
+        .select(constants_1.forbiddenUserData)
+        .exec();
     res.json(new response_1.default(true, user, 'User data gathered', ''));
 }));
 /**
  * GET - fetch all users
  */
 exports.users_get = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield user_1.default.find({}, constants_1.forbiddenUserData).exec();
+    const users = yield user_1.default.find().select(constants_1.forbiddenUserData);
     res.json(new response_1.default(true, users, 'Users gathered', ''));
 }));
 /**
@@ -69,7 +75,7 @@ exports.user_cover_update = (0, express_async_handler_1.default)((req, res) => _
     const updatedUser = yield user_1.default.findByIdAndUpdate(user._id, update, {
         new: true,
     }).exec();
-    res.json(new response_1.default(true, null, 'User cover photo updated', ''));
+    res.json(new response_1.default(true, updatedUser, 'User cover photo updated', ''));
 }));
 /**
  * PUT - update user password
@@ -110,7 +116,7 @@ exports.user_status_put = (0, express_async_handler_1.default)((req, res) => __a
     const { userID } = req.params;
     const { status } = req.body;
     const updatedUser = yield user_1.default.findByIdAndUpdate(userID, { isOnline: status }, { new: true }).exec();
-    res.json(new response_1.default(true, null, 'User status updated', ''));
+    res.json(new response_1.default(true, updatedUser, 'User status updated', ''));
 }));
 /**
  * PUT - update user
@@ -148,5 +154,5 @@ exports.user_update = (0, express_async_handler_1.default)((req, res) => __await
     const updateUser = yield user_1.default.findByIdAndUpdate(user._id, update, {
         new: true,
     }).exec();
-    res.json(new response_1.default(true, null, 'User updated', ''));
+    res.json(new response_1.default(true, updateUser, 'User updated', ''));
 }));

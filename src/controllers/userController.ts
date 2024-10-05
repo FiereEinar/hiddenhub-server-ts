@@ -15,7 +15,13 @@ import { UpdateQuery } from 'mongoose';
  */
 export const user_info_get = asyncHandler(
 	async (req: CustomRequest, res: Response) => {
-		const user = await User.findById(req.params.userID, forbiddenUserData);
+		const user = await User.findById(req.params.userID, forbiddenUserData)
+			.populate({
+				path: 'friends',
+				select: forbiddenUserData,
+			})
+			.select(forbiddenUserData)
+			.exec();
 		res.json(new JsonResponse(true, user, 'User data gathered', ''));
 	}
 );
@@ -24,7 +30,7 @@ export const user_info_get = asyncHandler(
  * GET - fetch all users
  */
 export const users_get = asyncHandler(async (req: CustomRequest, res) => {
-	const users = await User.find({}, forbiddenUserData).exec();
+	const users = await User.find().select(forbiddenUserData);
 	res.json(new JsonResponse(true, users, 'Users gathered', ''));
 });
 
@@ -72,7 +78,9 @@ export const user_cover_update = asyncHandler(
 			new: true,
 		}).exec();
 
-		res.json(new JsonResponse(true, null, 'User cover photo updated', ''));
+		res.json(
+			new JsonResponse(true, updatedUser, 'User cover photo updated', '')
+		);
 	}
 );
 
@@ -139,7 +147,7 @@ export const user_status_put = asyncHandler(async (req: CustomRequest, res) => {
 		{ new: true }
 	).exec();
 
-	res.json(new JsonResponse(true, null, 'User status updated', ''));
+	res.json(new JsonResponse(true, updatedUser, 'User status updated', ''));
 });
 
 /**
@@ -186,5 +194,5 @@ export const user_update = asyncHandler(async (req: CustomRequest, res) => {
 		new: true,
 	}).exec();
 
-	res.json(new JsonResponse(true, null, 'User updated', ''));
+	res.json(new JsonResponse(true, updateUser, 'User updated', ''));
 });
