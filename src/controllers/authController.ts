@@ -63,7 +63,9 @@ export const login_post = asyncHandler(async (req: Request, res: Response) => {
 		maxAge: 1000 * 60 * 60 * 24,
 	});
 
-	res.json(new JsonResponse(true, null, 'Login successfull', ''));
+	res.json(
+		new JsonResponse(true, { userID: user._id }, 'Login successfull', '')
+	);
 });
 
 /**

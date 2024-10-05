@@ -60,7 +60,7 @@ exports.login_post = (0, express_async_handler_1.default)((req, res) => __awaite
         sameSite: 'none',
         maxAge: 1000 * 60 * 60 * 24,
     });
-    res.json(new response_1.default(true, null, 'Login successfull', ''));
+    res.json(new response_1.default(true, { userID: user._id }, 'Login successfull', ''));
 }));
 /**
  * POST - Signup
